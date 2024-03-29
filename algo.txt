@@ -1,2 +1,0 @@
-1. harcassde algo (OpenCv)
-2. LBPH algorithm 

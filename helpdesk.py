@@ -9,7 +9,7 @@ from developer import Developer
 import tkinter
 import os
 
-class Face_Recognition_System:
+class help_desk:
     def __init__(self, root):
         self.root = root
         self.root.geometry("1920x1080+0+0")
@@ -20,5 +20,5 @@ class Face_Recognition_System:
 
 if __name__ == "__main__":
         root = Tk()
-        obj = Face_Recognition_System(root)
+        obj = help_desk(root)
         root.mainloop()

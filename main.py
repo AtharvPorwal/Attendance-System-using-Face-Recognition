@@ -10,6 +10,7 @@ from datetime import datetime
 import tkinter
 import os
 from time import strftime
+from helpdesk import help_desk
 class Face_Recognition_System:
     def __init__(self, root):
         self.root = root
@@ -107,10 +108,10 @@ class Face_Recognition_System:
         img8 = img8.resize((220, 220), Image.LANCZOS)  # Use LANCZOS instead of ANTIALIAS
         self.photoimg8 = ImageTk.PhotoImage(img8)
 
-        b1=Button(bg_img,image=self.photoimg8, cursor="hand2")
+        b1=Button(bg_img,image=self.photoimg8,command=self.help, cursor="hand2")
         b1.place(x=1000,y=90,width=220,height=220) # Change X & Y to change the postion of the button
 
-        b1_1=Button(bg_img,text="HELP DESK",cursor="hand2",font=('Helvetica', 24),bg="White",fg="red") # TEXT DETAILS
+        b1_1=Button(bg_img,text="HELP DESK",command=self.help,cursor="hand2",font=('Helvetica', 24),bg="White",fg="red") # TEXT DETAILS
         b1_1.place(x=1000,y=290,width=220,height=50)
 
 
@@ -205,6 +206,12 @@ class Face_Recognition_System:
     def dev (self):
         self.new_window=Toplevel(self.root)
         self.app=Developer(self.new_window)
+
+#Fuction For Helpdesk section to open
+        
+    def help (self):
+        self.new_window=Toplevel(self.root)
+        self.app=help_desk(self.new_window)
 
 
 
