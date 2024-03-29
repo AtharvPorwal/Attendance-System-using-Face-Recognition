@@ -4,6 +4,7 @@ from PIL import Image, ImageTk
 from tkinter import messagebox
 import mysql.connector
 import cv2
+import time
 
 class Student:
     def __init__(self, root):
@@ -31,21 +32,21 @@ class Student:
 
 
         #IMAGE 1
-        img = Image.open(r"D:\Projects\face regconistion attandence\images\facialrecognition.png")
+        img = Image.open(r"images\facialrecognition.png")
         img = img.resize((500, 130), Image.LANCZOS)  # Use LANCZOS instead of ANTIALIAS
         # Store the PhotoImage in an instance variable
         self.photoimg = ImageTk.PhotoImage(img)
         label = Label(self.root, image=self.photoimg)
         label.place(x=0,y=0,width=500,height=130)
 #IMAGE 2
-        img2 = Image.open(r"D:\Projects\face regconistion attandence\images\facialrecognition.png")
+        img2 = Image.open(r"images\facialrecognition.png")
         img2 = img2.resize((500, 130), Image.LANCZOS)  # Use LANCZOS instead of ANTIALIAS       
         # Store the PhotoImage in an instance variable
         self.photoimg2 = ImageTk.PhotoImage(img2)
         label = Label(self.root, image=self.photoimg2)
         label.place(x=500,y=0,width=500,height=130)
 #IMAGE 3
-        img3 = Image.open(r"D:\Projects\face regconistion attandence\images\facialrecognition.png")
+        img3 = Image.open(r"images\facialrecognition.png")
         img3 = img3.resize((500, 130), Image.LANCZOS)  # Use LANCZOS instead of ANTIALIAS
         # Store the PhotoImage in an instance variable
         self.photoimg3 = ImageTk.PhotoImage(img3)
@@ -53,7 +54,7 @@ class Student:
         label.place(x=1000,y=0,width=500,height=130)
 
 #BG IMAGE
-        img4 = Image.open(r"D:\Projects\face regconistion attandence\images\bg1.jpg")
+        img4 = Image.open(r"images\bg1.jpg")
         img4 = img4.resize((1530, 710), Image.LANCZOS)  # Use LANCZOS instead of ANTIALIAS
         # Store the PhotoImage in an instance variable
         self.photoimg4 = ImageTk.PhotoImage(img4)
@@ -73,7 +74,7 @@ class Student:
         Left_frame.place(x=10,y=10,width=720,height=580)
 
         #Left LABEL IMAGE
-        img_left = Image.open(r"D:\Projects\face regconistion attandence\images\facialrecognition.png")
+        img_left = Image.open(r"images\facialrecognition.png")
         img_left = img_left.resize((500, 130), Image.LANCZOS)  # Use LANCZOS instead of ANTIALIAS
         # Store the PhotoImage in an instance variable
         self.photoimg_left = ImageTk.PhotoImage(img_left)
@@ -117,7 +118,7 @@ class Student:
         sem_combo.grid(row=1, column=3,padx=2,pady=10,sticky=W)
 
 
-#Student Class ID
+#Student Class ID FRAME
         class_stu_frame=LabelFrame(main_frame,bd=2,bg="white",relief=RIDGE,text="Current Course Details",font=("times new roman" ,12, "bold"))
         class_stu_frame.place(x=10,y=280,width=720,height=330)
 
@@ -240,7 +241,7 @@ class Student:
         btn_frame1 = Frame(class_stu_frame,bd=2,relief=RIDGE,bg="white")
         btn_frame1.place(x=0,y=250, width=718, height=40)
 
-        take_btn = Button(btn_frame1,text="Take Sample Photo",width=40,font=("times new roman" ,12, "bold"),bg="blue",fg="White")
+        take_btn = Button(btn_frame1,text="Take Sample Photo",command=self.genrate_dataset,width=40,font=("times new roman" ,12, "bold"),bg="blue",fg="White")
         take_btn.grid(row=0,column=1,)
 
         update_img_btn = Button(btn_frame1,text="Update Sample Photo",width=40,font=("times new roman" ,12, "bold"),bg="blue",fg="White")
@@ -483,6 +484,78 @@ class Student:
         self.var_stu_address.set("")
         self.var_stu_mentor.set("")
         self.var_radio1.set("")
+
+#===============================Generate Dataset with Samples
+    def genrate_dataset(self):
+        if self.var_dep.get() == "Select Department" or self.var_stu_name.get() == "" or self.var_stu_id.get() == "":
+             messagebox.showerror("Error", "All Fields are Required", parent=self.root)
+        else:
+            try:
+                conn = mysql.connector.connect(host="localhost",user="root",password="root",database="face_recognizer")
+                my_cursor =conn.cursor()
+                my_cursor.execute("select * from student")
+                myresult=my_cursor.fetchall()
+                print(myresult)
+                record_count = 0
+                for x in myresult:
+                    record_count += 1
+                my_cursor.execute("UPDATE student SET dep=%s, course=%s, year=%s, sem=%s, name=%s, `div`=%s, roll=%s, gender=%s, dob=%s, email=%s, phone=%s, address=%s, teacher=%s, `sample photo`=%s WHERE studentid=%s", (
+                                                                                                                                        self.var_dep.get(),
+                                                                                                                                        self.var_course.get(),
+                                                                                                                                        self.var_year.get(),
+                                                                                                                                        self.var_sem.get(),
+                                                                                                                                        self.var_stu_name.get(),
+                                                                                                                                        self.var_stu_div.get(),
+                                                                                                                                        self.var_stu_rollno.get(),
+                                                                                                                                        self.var_stu_gender.get(),
+                                                                                                                                        self.var_stu_dob.get(),
+                                                                                                                                        self.var_stu_email.get(),
+                                                                                                                                        self.var_stu_phn.get(),
+                                                                                                                                        self.var_stu_address.get(),
+                                                                                                                                        self.var_stu_mentor.get(),
+                                                                                                                                        self.var_radio1.get(),
+                                                                                                                                        self.var_stu_id.get()==record_count+1
+                ))
+                conn.commit()
+                self.fetch_data()
+                self.reset_data()
+                conn.close()
+
+
+                #=============Load  the data into treeview
+                face_classifier = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+
+                def face_cropped(img):
+                        gray =cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+                        faces=face_classifier.detectMultiScale(gray,1.3,5)
+                        for (x,y,w,h) in faces:
+                            face_cropped=img[y:y+h,x:x+w]
+                            return face_cropped
+
+                cap=cv2.VideoCapture(0)
+                img_id=0
+                while True:
+                    print("Current img_id:", img_id)
+                    print("Record count: ",record_count)
+                    ret,my_frame=cap.read()
+                    if face_cropped(my_frame) is not None:
+                        img_id+=1
+                        face=cv2.resize(face_cropped(my_frame),(450,450))
+                        face=cv2.cvtColor(face,cv2.COLOR_BGR2GRAY)
+                        timestamp = int(time.time())
+                        file_name_path = "data/user."+str(record_count)+"."+str(img_id)+".jpg"
+                        cv2.imwrite(file_name_path,face)
+                        cv2.putText(face,str(img_id),(50,50),cv2.FONT_HERSHEY_COMPLEX,2,(0,255,0),2)
+                        cv2.imshow("Cropped Face",face)
+                        
+                    if cv2.waitKey(1)==13 or int(img_id)==100:
+                        break
+                cap.release()
+                cv2.destroyAllWindows()
+                messagebox.showinfo("Result","Data has been saved successfully.")
+            except Exception as es:
+                messagebox.showerror("Error",f"Due to :{str(es)}",parent=self.root)
+
 
 
 
