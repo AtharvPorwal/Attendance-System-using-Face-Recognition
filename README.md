@@ -21,10 +21,6 @@ Ensure you have the following libraries installed:
 - `numpy`
 - `mysql-connector-python`
 
-You can install them via pip:
-
-```
-pip install tkinter pillow opencv-python numpy mysql-connector-python
 ```
 
 ## Usage
@@ -55,6 +51,6 @@ Make sure to place the `haarcascade_frontalface_default.xml` file in the same di
 
 ## Contributors
 
-- [Your Name](https://github.com/yourusername)
+- Atharv Porwal
 
 Feel free to contribute by submitting bug fixes, feature requests, or pull requests.
